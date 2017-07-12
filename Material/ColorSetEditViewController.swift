@@ -15,7 +15,7 @@ class ColorSetEditViewController: UIViewController {
     @IBOutlet weak var nameLabel: UILabel!
     
     
-    var indexPathToBeDeleted = NSIndexPath()
+    var indexPathToBeDeleted = IndexPath()
     var listView = ColorListViewController()
     var main = MainViewController()
     var colors = [Color]()
@@ -32,13 +32,13 @@ class ColorSetEditViewController: UIViewController {
             frame: CGRect(x: 0, y: 0, width: self.tableView.frame.width, height: 1)
         )
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ColorSetEditViewController.keyboardWillShow(_:)), name: UIKeyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(ColorSetEditViewController.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ColorSetEditViewController.keyboardWillHide(_:)), name: UIKeyboardWillHideNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(ColorSetEditViewController.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         
         initPage()
     }
-    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         self.view.endEditing(true)
     }
     
@@ -56,13 +56,13 @@ class ColorSetEditViewController: UIViewController {
         print(CGSize(width: self.view.bounds.width, height: ceil((self.view.bounds.height - 64) * 0.36)))
         
         let pagesScrollViewSize = scrollView.frame.size
-        scrollView.contentSize = CGSizeMake(pagesScrollViewSize.width * CGFloat(colors.count), 0)
+        scrollView.contentSize = CGSize(width: pagesScrollViewSize.width * CGFloat(colors.count), height: 0)
         
         // Load the initial set of pages that are on screen
         loadVisiblePages()
     }
     
-    func loadPage(page: Int) {
+    func loadPage(_ page: Int) {
         if page < 0 || page >= colors.count {
             // If it's outside the range of what you have to display, then do nothing
             return
@@ -75,11 +75,11 @@ class ColorSetEditViewController: UIViewController {
             var frame = scrollView.bounds
             frame.origin.x = frame.size.width * CGFloat(page)
             frame.origin.y = 0.0
-            frame = CGRectInset(frame, 10.0, 0.0)
+            frame = frame.insetBy(dx: 10.0, dy: 0.0)
             
             let newPageView = UILabel()
             newPageView.clipsToBounds = true
-            newPageView.contentMode = .ScaleAspectFit
+            newPageView.contentMode = .scaleAspectFit
             newPageView.frame = frame
             newPageView.frame.size.height = newPageView.frame.size.width
             newPageView.layer.cornerRadius = newPageView.frame.size.width / 2
@@ -105,45 +105,45 @@ class ColorSetEditViewController: UIViewController {
         let lastPage = page + 1
         
         // Load pages in our range
-        for var index = firstPage; index <= lastPage; index += 1 {
+        for index in firstPage...lastPage {
             loadPage(index)
         }
     }
     
     
-    func scrollViewDidScroll(scrollView: UIScrollView) {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
         // Load the pages that are now on screen
         loadVisiblePages()
     }
     
-    @IBAction func doneButtonDidTap(sender: AnyObject) {
-        let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: 0, inSection: 0)) as! ColorEditCell
+    @IBAction func doneButtonDidTap(_ sender: AnyObject) {
+        let cell = tableView.cellForRow(at: IndexPath(row: 0, section: 0)) as! ColorEditCell
         main.colors[listIndex][0].mainTitle = cell.valueField.text!
         let tmp = main.colors[listIndex][0]
         main.colors[listIndex][0] = main.colors[listIndex][currentPage]
         main.colors[listIndex][currentPage] = tmp
         
-        self.dismissViewControllerAnimated(true, completion: nil)
+        self.dismiss(animated: true, completion: nil)
     }
     
-    @IBAction func cancleButtonDidTap(sender: AnyObject) {
-        self.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func cancleButtonDidTap(_ sender: AnyObject) {
+        self.dismiss(animated: true, completion: nil)
     }
 
-    func keyboardWillShow(notification:NSNotification) {
+    func keyboardWillShow(_ notification:Notification) {
         adjustingHeight(true, notification: notification)
     }
     
-    func keyboardWillHide(notification:NSNotification) {
+    func keyboardWillHide(_ notification:Notification) {
         adjustingHeight(false, notification: notification)
     }
     
-    func adjustingHeight(show:Bool, notification:NSNotification) {
+    func adjustingHeight(_ show:Bool, notification:Notification) {
         var userInfo = notification.userInfo!
-        let keyboardFrame:CGRect = (userInfo[UIKeyboardFrameBeginUserInfoKey] as! NSValue).CGRectValue()
-        let animationDurarion = userInfo[UIKeyboardAnimationDurationUserInfoKey] as! NSTimeInterval
-        let changeInHeight = (CGRectGetHeight(keyboardFrame) - 40) * (show ? 1 : -1)
-        UIView.animateWithDuration(animationDurarion, animations: { () -> Void in
+        let keyboardFrame:CGRect = (userInfo[UIKeyboardFrameBeginUserInfoKey] as! NSValue).cgRectValue
+        let animationDurarion = userInfo[UIKeyboardAnimationDurationUserInfoKey] as! TimeInterval
+        let changeInHeight = (keyboardFrame.height - 40) * (show ? 1 : -1)
+        UIView.animate(withDuration: animationDurarion, animations: { () -> Void in
             self.view.layer.position.y -= changeInHeight
         })
     }
@@ -152,42 +152,42 @@ class ColorSetEditViewController: UIViewController {
 
 extension ColorSetEditViewController: UITableViewDataSource {
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return titles.count + 1
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if indexPath.row == 0 {
-            let nibArray = NSBundle.mainBundle().loadNibNamed("CustomCell", owner: self, options: nil)
-            var cell = tableView.dequeueReusableCellWithIdentifier("EDITCell") as? ColorEditCell
+            let nibArray = Bundle.main.loadNibNamed("CustomCell", owner: self, options: nil)
+            var cell = tableView.dequeueReusableCell(withIdentifier: "EDITCell") as? ColorEditCell
             
             if cell == nil {
                 cell = nibArray![5] as? ColorEditCell
             }
             
             cell!.titleLabel.text = titles[indexPath.row]
-            cell!.backgroundColor = .clearColor()
+            cell!.backgroundColor = .clear
             cell!.valueField.text = colors[0].mainTitle
             cell!.valueField.placeholder = "TOUCH TO WRITE NAME"
             return cell!
         } else {
-            let cell = UITableViewCell(style: .Default, reuseIdentifier: "cell")
+            let cell = UITableViewCell(style: .default, reuseIdentifier: "cell")
             cell.textLabel?.text = "DELETE COLOR SET"
             cell.textLabel?.textColor = UIColor(red:0.94, green:0.33, blue:0.31, alpha:1)
             cell.textLabel?.font = UIFont(name: "HelveticaNeue-Bold", size: 16)
-            cell.selectionStyle = .None
-            cell.backgroundColor = .clearColor()
+            cell.selectionStyle = .none
+            cell.backgroundColor = .clear
             return cell
         }
     }
     
-    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 55
     }
 }
 
 extension ColorSetEditViewController: UITableViewDelegate {
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.row == 1 {
         let alert = UIAlertView(
             title: "WARNING",
@@ -203,12 +203,12 @@ extension ColorSetEditViewController: UITableViewDelegate {
 
 
 extension ColorSetEditViewController: UIAlertViewDelegate {
-    func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
+    func alertView(_ alertView: UIAlertView, clickedButtonAt buttonIndex: Int) {
         if buttonIndex == 1 {
-            main.colors.removeAtIndex(listIndex)
+            main.colors.remove(at: listIndex)
             listView.deleted = true
             
-            self.dismissViewControllerAnimated(true, completion: nil)
+            self.dismiss(animated: true, completion: nil)
         }
     }
 }

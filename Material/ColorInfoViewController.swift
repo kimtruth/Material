@@ -42,13 +42,13 @@ class ColorInfoViewController: UIViewController {
         )
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         load()
         self.tableView.reloadData()
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        let navi = segue.destinationViewController as! UINavigationController
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let navi = segue.destination as! UINavigationController
         let view = navi.viewControllers.first as! ColorEditViewController
         view.color = color
         view.main = main
@@ -64,13 +64,13 @@ class ColorInfoViewController: UIViewController {
 
 extension ColorInfoViewController: UITableViewDataSource {
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 3
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let nibArray = NSBundle.mainBundle().loadNibNamed("CustomCell", owner: self, options: nil)
-        var cell = tableView.dequeueReusableCellWithIdentifier("INFOCell") as? ColorInfoCell
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let nibArray = Bundle.main.loadNibNamed("CustomCell", owner: self, options: nil)
+        var cell = tableView.dequeueReusableCell(withIdentifier: "INFOCell") as? ColorInfoCell
         
         if cell == nil {
             cell = nibArray![4] as? ColorInfoCell
@@ -85,19 +85,19 @@ extension ColorInfoViewController: UITableViewDataSource {
             cell!.valueLabel.text = color.memo
         }
         
-        cell!.backgroundColor = .clearColor()
+        cell!.backgroundColor = .clear
         return cell!
     }
     
-    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 55
     }
 }
 extension ColorInfoViewController: UITableViewDelegate {
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        let cell = tableView.cellForRowAtIndexPath(indexPath) as! ColorInfoCell
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let cell = tableView.cellForRow(at: indexPath) as! ColorInfoCell
         let hexString = cell.valueLabel.text
-        UIPasteboard.generalPasteboard().string = hexString
+        UIPasteboard.general.string = hexString
         let alert = UIAlertView(
             title: "복사되었습니다!",
             message: hexString,

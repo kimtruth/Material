@@ -147,7 +147,7 @@
 					983D86221C39FE3000197852 = {
 						CreatedOnToolsVersion = 7.2;
 						DevelopmentTeam = Z79MDNXYJV;
-						LastSwiftMigration = 0810;
+						LastSwiftMigration = 0830;
 					};
 				};
 			};
@@ -302,7 +302,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = kr.mikumiku.Material;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				SWIFT_VERSION = 2.3;
+				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -319,7 +319,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = kr.mikumiku.Material;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				SWIFT_VERSION = 2.3;
+				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

@@ -31,9 +31,9 @@ class ColorListViewController: UIViewController {
         self.deleted = true
         print(self.deleted)
     }
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         if deleted {
-            self.navigationController?.popToRootViewControllerAnimated(true)
+            self.navigationController?.popToRootViewController(animated: true)
         } else {
             colors = main.colors[listIndex]
             let title = colors[0].mainTitle
@@ -44,16 +44,16 @@ class ColorListViewController: UIViewController {
         }
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "editSegue" {
-            let navi = segue.destinationViewController as! UINavigationController
+            let navi = segue.destination as! UINavigationController
             let view = navi.viewControllers.first as! ColorSetEditViewController
             view.listIndex = listIndex
             view.colors = colors
             view.main = main
             view.listView = self
         } else {
-            let view = segue.destinationViewController as! ColorInfoViewController
+            let view = segue.destination as! ColorInfoViewController
             view.color = colors[selectedIndex]
             view.main = main
             view.listIndex = listIndex
@@ -69,15 +69,15 @@ class ColorListViewController: UIViewController {
 
 extension ColorListViewController: UITableViewDataSource {
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return colors.count + 1
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let nibArray = NSBundle.mainBundle().loadNibNamed("CustomCell", owner: self, options: nil)
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let nibArray = Bundle.main.loadNibNamed("CustomCell", owner: self, options: nil)
         
         if indexPath.row != colors.count {
-            var cell = tableView.dequeueReusableCellWithIdentifier("DCCell") as? DetailColorCell
+            var cell = tableView.dequeueReusableCell(withIdentifier: "DCCell") as? DetailColorCell
             if cell == nil {
                 cell = nibArray![2] as? DetailColorCell
             }
@@ -86,33 +86,33 @@ extension ColorListViewController: UITableViewDataSource {
             cell!.colorLabel.backgroundColor = stringToColor(color.RGB)
             cell!.mainLabel.text = color.title
             cell!.subLabel.text = color.RGB
-            cell!.backgroundColor = .clearColor()
+            cell!.backgroundColor = .clear
             return cell!
         } else {
-            var cell = tableView.dequeueReusableCellWithIdentifier("DCLCell") as? DetailColorLastCell
+            var cell = tableView.dequeueReusableCell(withIdentifier: "DCLCell") as? DetailColorLastCell
             if cell == nil {
                 cell = nibArray![3] as? DetailColorLastCell
             }
-            cell!.backgroundColor = .clearColor()
+            cell!.backgroundColor = .clear
             return cell!
         }
     }
     
-    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 55
     }
     
-    func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        if editingStyle == .Delete {
-            main.colors[listIndex].removeAtIndex(indexPath.row)
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            main.colors[listIndex].remove(at: indexPath.row)
             colors = main.colors[listIndex]
             self.tableView.beginUpdates()
-            self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+            self.tableView.deleteRows(at: [indexPath], with: .automatic)
             self.tableView.endUpdates()
         }
     }
     
-    func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         if indexPath.row == colors.count {
             return false
         }
@@ -121,7 +121,7 @@ extension ColorListViewController: UITableViewDataSource {
 }
 
 extension ColorListViewController: UITableViewDelegate {
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.row == colors.count {
             let alert = UIAlertView(
                 title: "새로운 컬러",
@@ -130,23 +130,23 @@ extension ColorListViewController: UITableViewDelegate {
                 cancelButtonTitle: "확인",
                 otherButtonTitles: "취소"
             )
-            alert.alertViewStyle = .PlainTextInput
+            alert.alertViewStyle = .plainTextInput
             alert.show()
         }
         else {
             selectedIndex = indexPath.row
-            self.performSegueWithIdentifier("segueToInfo", sender: self)
+            self.performSegue(withIdentifier: "segueToInfo", sender: self)
         }
     }
 }
 
 extension ColorListViewController: UIAlertViewDelegate {
-    func alertView(alertView: UIAlertView, clickedButtonAtIndex buttonIndex: Int) {
+    func alertView(_ alertView: UIAlertView, clickedButtonAt buttonIndex: Int) {
         if buttonIndex == 1 {
             return
         }
         var title = ""
-        if let text = alertView.textFieldAtIndex(0)?.text {
+        if let text = alertView.textField(at: 0)?.text {
             if text.isEmpty {
                 title = "UNTITLED COLOR"
             } else {
@@ -164,7 +164,7 @@ extension ColorListViewController: UIAlertViewDelegate {
         colors = main.colors[listIndex]
         
         self.tableView.reloadData()
-        let path = NSIndexPath(forRow: colors.count - 1, inSection: 0)
-        self.tableView.scrollToRowAtIndexPath(path, atScrollPosition: .Top, animated: true)
+        let path = IndexPath(row: colors.count - 1, section: 0)
+        self.tableView.scrollToRow(at: path, at: .top, animated: true)
     }
 }

@@ -7,6 +7,30 @@
 //
 
 import UIKit
+// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
+// Consider refactoring the code to use the non-optional operators.
+fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l < r
+  case (nil, _?):
+    return true
+  default:
+    return false
+  }
+}
+
+// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
+// Consider refactoring the code to use the non-optional operators.
+fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l > r
+  default:
+    return rhs < lhs
+  }
+}
+
 
 class ColorEditViewController: UIViewController {
     @IBOutlet weak var colorSelectButton: UIButton!
@@ -24,18 +48,18 @@ class ColorEditViewController: UIViewController {
     let nameRow = 0
     let memoRow = 1
     
-    @IBAction func cancleButtonDidTap(sender: AnyObject) {
-        self.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func cancleButtonDidTap(_ sender: AnyObject) {
+        self.dismiss(animated: true, completion: nil)
     }
     
-    @IBAction func doneButtonDidTap(sender: AnyObject) {
-        let nameCell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: nameRow, inSection: 0)) as! ColorEditCell
-        let memoCell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: memoRow, inSection: 0)) as! ColorEditCell
+    @IBAction func doneButtonDidTap(_ sender: AnyObject) {
+        let nameCell = tableView.cellForRow(at: IndexPath(row: nameRow, section: 0)) as! ColorEditCell
+        let memoCell = tableView.cellForRow(at: IndexPath(row: memoRow, section: 0)) as! ColorEditCell
         
         main.colors[listIndex][subIndex].title = nameCell.valueField.text!
         main.colors[listIndex][subIndex].memo = memoCell.valueField.text!
         main.colors[listIndex][subIndex].RGB = self.hexField.text!
-        self.dismissViewControllerAnimated(true, completion: nil)
+        self.dismiss(animated: true, completion: nil)
     }
     
     override func viewDidLoad() {
@@ -44,10 +68,10 @@ class ColorEditViewController: UIViewController {
             frame: CGRect(x: 0, y: 0, width: self.tableView.frame.width, height: 1)
         )
         self.hexField.text = color.RGB
-        self.hexField.tintColor = .whiteColor()
+        self.hexField.tintColor = .white
         self.hexField.delegate = self
-        self.hexField.addTarget(self, action: #selector(ColorEditViewController.didChangedHexText(_:)), forControlEvents: .EditingChanged)
-        if UIDevice.currentDevice().userInterfaceIdiom == .Pad {
+        self.hexField.addTarget(self, action: #selector(ColorEditViewController.didChangedHexText(_:)), for: .editingChanged)
+        if UIDevice.current.userInterfaceIdiom == .pad {
             self.hexField.becomeFirstResponder()
         }
         
@@ -55,30 +79,30 @@ class ColorEditViewController: UIViewController {
         self.colorSelectButton.clipsToBounds = true
         self.colorSelectButton.backgroundColor = stringToColor(color.RGB)
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ColorEditViewController.keyboardWillShow(_:)), name: UIKeyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(ColorEditViewController.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ColorEditViewController.keyboardWillHide(_:)), name: UIKeyboardWillHideNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(ColorEditViewController.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(ColorEditViewController.handleTap(_:)))
         self.view!.addGestureRecognizer(tap)
     }
     
-    func didChangedHexText(textField: UITextField) {
+    func didChangedHexText(_ textField: UITextField) {
         if textField.text?.characters.first != "#" {
             textField.text = "#" + textField.text!
         }
         if textField.text?.characters.count > 7 {
             textField.deleteBackward()
         }
-        textField.text = textField.text?.uppercaseString
+        textField.text = textField.text?.uppercased()
         self.colorSelectButton.backgroundColor = stringToColor(textField.text!)
     }
     
-    func handleTap(recognizer: UITapGestureRecognizer) {
+    func handleTap(_ recognizer: UITapGestureRecognizer) {
         self.view.endEditing(true)
     }
     
-    func keyboardWillShow(notification:NSNotification) {
+    func keyboardWillShow(_ notification:Notification) {
         if isKeyboardShowing == false{
             if !ishexTouched {
                 adjustingHeight(true, notification: notification)
@@ -87,7 +111,7 @@ class ColorEditViewController: UIViewController {
         }
     }
     
-    func keyboardWillHide(notification:NSNotification) {
+    func keyboardWillHide(_ notification:Notification) {
         print(self.view.layer.position.y)
         if isKeyboardShowing == true{
             if !ishexTouched {
@@ -98,12 +122,12 @@ class ColorEditViewController: UIViewController {
         }
     }
     
-    func adjustingHeight(show:Bool, notification:NSNotification) {
+    func adjustingHeight(_ show:Bool, notification:Notification) {
         var userInfo = notification.userInfo!
-        let keyboardFrame:CGRect = (userInfo[UIKeyboardFrameBeginUserInfoKey] as! NSValue).CGRectValue()
-        let animationDurarion = userInfo[UIKeyboardAnimationDurationUserInfoKey] as! NSTimeInterval
-        let changeInHeight = (CGRectGetHeight(keyboardFrame) - 40) * (show ? 1 : -1)
-        UIView.animateWithDuration(animationDurarion, animations: { () -> Void in
+        let keyboardFrame:CGRect = (userInfo[UIKeyboardFrameBeginUserInfoKey] as! NSValue).cgRectValue
+        let animationDurarion = userInfo[UIKeyboardAnimationDurationUserInfoKey] as! TimeInterval
+        let changeInHeight = (keyboardFrame.height - 40) * (show ? 1 : -1)
+        UIView.animate(withDuration: animationDurarion, animations: { () -> Void in
             self.view.layer.position.y -= changeInHeight
         })
     }
@@ -111,13 +135,13 @@ class ColorEditViewController: UIViewController {
 
 extension ColorEditViewController: UITableViewDataSource {
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return titles.count
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let nibArray = NSBundle.mainBundle().loadNibNamed("CustomCell", owner: self, options: nil)
-        var cell = tableView.dequeueReusableCellWithIdentifier("EDITCell") as? ColorEditCell
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let nibArray = Bundle.main.loadNibNamed("CustomCell", owner: self, options: nil)
+        var cell = tableView.dequeueReusableCell(withIdentifier: "EDITCell") as? ColorEditCell
         
         if cell == nil {
             cell = nibArray![5] as? ColorEditCell
@@ -131,18 +155,18 @@ extension ColorEditViewController: UITableViewDataSource {
             cell!.valueField.text = color.memo
         }
         
-        cell!.valueField.tintColor = .whiteColor()
-        cell!.backgroundColor = .clearColor()
+        cell!.valueField.tintColor = .white
+        cell!.backgroundColor = .clear
         
         return cell!
     }
     
-    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForRowAtIndexPath indexPath: IndexPath) -> CGFloat {
         return 55
     }
 }
 extension ColorEditViewController: UITextFieldDelegate {
-    func textFieldShouldBeginEditing(textField: UITextField) -> Bool {
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
         if !isKeyboardShowing {
             ishexTouched = true
         }
